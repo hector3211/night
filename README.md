@@ -1,3 +1,5 @@
+![Night image](./public/night.png)
+
 # Night
 
 ### Night a minimal utra fast database seed tool
