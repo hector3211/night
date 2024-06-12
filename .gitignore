@@ -1,0 +1,9 @@
+
+/bin*
+.env*
+todo.md
+log.txt
+night
+test.db
+mydb.db
+seed.sql
