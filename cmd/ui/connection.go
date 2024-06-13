@@ -94,13 +94,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyEnter:
+		switch msg.String() {
+		case "enter":
 			if len(m.input.Value()) > 1 {
 				m.connectionUrl.Update(m.input.Value())
 				return m, tea.Quit
 			}
-		case tea.KeyCtrlC, tea.KeyEsc:
+		case "ctrl-c", "esc", "q":
 			*m.exit = true
 			return m, tea.Quit
 		}

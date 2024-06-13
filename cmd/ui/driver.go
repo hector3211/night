@@ -68,7 +68,7 @@ func (m DriverModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl-c", "q":
+		case "ctrl-c", "esc", "q":
 			*m.exit = true
 			return m, tea.Quit
 		case "up", "k":
@@ -100,7 +100,7 @@ func (m DriverModel) View() string {
 		// 	checked = "x"
 		// }
 
-		s += fmt.Sprintf("%s %s\n%s\n\n", driverCursorStle.Render(cursor), choice.Title, choice.Desc)
+		s += fmt.Sprintf("%s %s\n\n", driverCursorStle.Render(cursor), choice.Title)
 	}
 	return s
 }

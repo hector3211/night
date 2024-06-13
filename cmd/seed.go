@@ -136,5 +136,11 @@ var seedCmd = &cobra.Command{
 			cobra.CheckErr(fmt.Sprintf("failed inserting to DB with: %s", err))
 		}
 
+		// run progress bar ui
+		tprogram := tea.NewProgram(ui.InitializeProgressModel(project))
+		if _, err := tprogram.Run(); err != nil {
+			cobra.CheckErr(fmt.Sprintf("failed runing progress model: %s", err))
+		}
+		project.ExitCli(tprogram)
 	},
 }

@@ -54,8 +54,8 @@ func (f FileModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyCtrlC, tea.KeyEsc:
+		switch msg.String() {
+		case "ctrl-c", "esc", "q":
 			*f.exit = true
 			return f, tea.Quit
 		}
