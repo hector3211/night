@@ -14,6 +14,30 @@ go install github.com/hector3211/night@latest
 
 ### Get Started
 
+Create a file and call it `seed.sql` fill it out to your liking and point Night to it.
+
+### Example
+
+```sql
+--  Sqlite Version
+CREATE TABLE IF NOT EXISTS user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Postgres Version
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_users_usersname ON users(username);
+
+INSERT INTO users (username) VALUES ( 'maddog' );
+```
+
 ```bash
 night seed
 ```
