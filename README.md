@@ -38,6 +38,8 @@ CREATE INDEX idx_users_usersname ON users(username);
 INSERT INTO users (username) VALUES ( 'maddog' );
 ```
 
+Then run this command to start seeding
+
 ```bash
 night seed
 ```
