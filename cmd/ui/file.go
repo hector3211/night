@@ -5,6 +5,7 @@ import (
 	"night/cmd/program"
 	"night/cmd/utils"
 	"os"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/filepicker"
 	"github.com/charmbracelet/lipgloss"
@@ -33,11 +34,17 @@ type FileModel struct {
 	exit       *bool
 }
 
-func InitializeFileModel(selection *SelectedFilePath, program *program.Project) FileModel {
+func InitializeFileModel(fileType *program.SeedLanguage, selection *SelectedFilePath, program *program.Project) FileModel {
+	var fileTypeStr string
+	if fileType == nil {
+		fileTypeStr = "sql"
+	} else {
+		fileTypeStr = strings.ToLower(fileType.String())
+	}
 	fp := filepicker.New()
-	fp.AllowedTypes = []string{".sql"}
+	fp.AllowedTypes = []string{fmt.Sprintf(".%s", fileTypeStr)}
 	fp.CurrentDirectory, _ = os.Getwd()
-	header := "Search for your sql seed file"
+	header := fmt.Sprintf("Search for your seed.%s file", fileTypeStr)
 	return FileModel{
 		header:     sqlFileTitleStyle.Render(header),
 		filePicker: fp,

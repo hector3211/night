@@ -8,9 +8,31 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type SeedLanguage int
+
+const (
+	UNKNWON SeedLanguage = iota
+	GOLANG
+	SQL
+)
+
+var DefaultSeedLanguage = SQL
+
+func (s SeedLanguage) String() string {
+	switch s {
+	case GOLANG:
+		return "Go"
+	case SQL:
+		return "SQL"
+	default:
+		return "SQL"
+	}
+}
+
 type Project struct {
-	DBDriver      flags.DataBaseDriver
-	SqlFilePath   flags.SqlFile
+	DBDriver flags.DataBaseDriver
+	FilePath flags.File
+	SeedLanguage
 	ConnectionUrl string
 	Exit          bool
 }

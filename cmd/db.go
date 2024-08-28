@@ -13,7 +13,7 @@ import (
 type DataBase struct {
 	DB               *sql.DB
 	DBDriver         *flags.DataBaseDriver
-	SqlFilePath      string
+	FilePath         string
 	ConnectionString string
 }
 
@@ -26,7 +26,7 @@ func OpenDB(driver flags.DataBaseDriver, SqlFilePath, ConnectionString string) (
 	newDb := DataBase{
 		DB:               db,
 		DBDriver:         &driver,
-		SqlFilePath:      SqlFilePath,
+		FilePath:         SqlFilePath,
 		ConnectionString: ConnectionString,
 	}
 
