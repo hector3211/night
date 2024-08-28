@@ -38,10 +38,11 @@ CREATE INDEX idx_users_usersname ON users(username);
 INSERT INTO users (username) VALUES ( 'maddog' );
 ```
 
-### SQL Example
+### Go Example
 
 ```go
 
+// User Table
 type Users struct {
     ID night.Int `orm:"primary_key"`
     Name night.String
