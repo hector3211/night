@@ -14,9 +14,9 @@ go install github.com/hector3211/night@latest
 
 ### Get Started
 
-Create a file and call it `seed.sql` fill it out to your liking and point Night to it.
+Create a file and call it `seed.sql` or `seed.go` fill it out to your liking and point Night to it.
 
-### Example
+### SQL Example
 
 ```sql
 --  Sqlite Version
@@ -38,6 +38,19 @@ CREATE INDEX idx_users_usersname ON users(username);
 INSERT INTO users (username) VALUES ( 'maddog' );
 ```
 
+### SQL Example
+
+```go
+
+type Users struct {
+    ID night.Int `orm:"primary_key"`
+    Name night.String
+    Email night.VarChar `orm:"unique"`
+    EmailVerified night.Bool `orm:"nullable"`
+}
+
+```
+
 Then run this command to start seeding
 
 ```bash
@@ -46,7 +59,8 @@ night seed
 
 ### Database Drivers Supported
 
-- sqlite3
-- postgres
+✅ sqlite3
+✅ postgres
+🟧 mysql
 
 more incoming...
