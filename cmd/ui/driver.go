@@ -26,9 +26,9 @@ var Items = []Item{
 }
 
 var (
-	driverTitleStyle = lipgloss.NewStyle().Background(lipgloss.Color("#15F5BA")).Foreground(lipgloss.Color("#F0F3FF")).Bold(true).Padding(0, 1, 0)
-	driverErrorStyle = lipgloss.NewStyle().Background(lipgloss.Color("#ff757f")).Bold(true).Padding(0, 0, 0)
-	driverCursorStle = lipgloss.NewStyle().Foreground(lipgloss.Color("#836FFF"))
+	driverTitleStyle  = lipgloss.NewStyle().Background(lipgloss.Color("#15F5BA")).Foreground(lipgloss.Color("#F0F3FF")).Bold(true).Padding(0, 1, 0)
+	driverErrorStyle  = lipgloss.NewStyle().Background(lipgloss.Color("#ff757f")).Bold(true).Padding(0, 0, 0)
+	driverCursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#836FFF"))
 )
 
 type SelectedDriver struct {
@@ -100,7 +100,7 @@ func (m DriverModel) View() string {
 		// 	checked = "x"
 		// }
 
-		s += fmt.Sprintf("%s %s\n\n", driverCursorStle.Render(cursor), choice.Title)
+		s += fmt.Sprintf("%s %s\n\n", driverCursorStyle.Render(cursor), choice.Title)
 	}
 	return s
 }

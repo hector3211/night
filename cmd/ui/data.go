@@ -9,17 +9,11 @@ import (
 )
 
 var (
-	TitleStyle = lipgloss.NewStyle().Background(lipgloss.Color("#15F5BA")).Foreground(lipgloss.Color("#F0F3FF")).Bold(true).Padding(0, 1, 0)
-	ErrorStyle = lipgloss.NewStyle().Background(lipgloss.Color("#ff757f")).Bold(true).Padding(0, 0, 0)
+	DataTitleStyle  = lipgloss.NewStyle().Background(lipgloss.Color("#15F5BA")).Foreground(lipgloss.Color("#F0F3FF")).Bold(true).Padding(0, 1, 0)
+	DataErrorStyle  = lipgloss.NewStyle().Background(lipgloss.Color("#ff757f")).Bold(true).Padding(0, 0, 0)
+	DataCursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#836FFF"))
 )
 
-//	type SelectedFilePath struct {
-//		Choice string
-//	}
-//
-//	func (s *SelectedFilePath) Update(value string) {
-//		s.Choice = value
-//	}
 type SelectedLanguage struct {
 	Choice string
 }
@@ -61,7 +55,7 @@ func (f ChoiceModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl-c", "esc":
+		case "ctrl-c", "esc", "q":
 			*f.exit = true
 			return f, tea.Quit
 
@@ -98,11 +92,11 @@ func (f ChoiceModel) View() string {
 		// Is the cursor pointing at this choice?
 		cursor := " " // no cursor
 		if f.cursor == i {
-			cursor = "▶️" // cursor!
+			cursor = ">"
 		}
 
 		// Render the row
-		s += fmt.Sprintf("%s %s\n", cursor, choice)
+		s += fmt.Sprintf("%s %s\n", DataCursorStyle.Render(cursor), choice)
 	}
 
 	// The footer
