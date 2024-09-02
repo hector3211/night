@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"night/cmd/flags"
 	"night/cmd/program"
 	"night/cmd/utils"
 	"os"
@@ -34,7 +35,7 @@ type FileModel struct {
 	exit       *bool
 }
 
-func InitializeFileModel(fileType *program.SeedLanguage, selection *SelectedFilePath, program *program.Project) FileModel {
+func InitializeFileModel(fileType *flags.SeedLanguage, selection *SelectedFilePath, program *program.Project) FileModel {
 	var fileTypeStr string
 	if fileType == nil {
 		fileTypeStr = "sql"

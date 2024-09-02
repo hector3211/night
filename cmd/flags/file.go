@@ -13,7 +13,7 @@ func (f *File) Type() string {
 }
 
 func (f *File) Set(value string) error {
-	for _, driver := range AllowedDbDrivers {
+	for _, driver := range AllowedFileTypes {
 		if driver == value {
 			*f = File(value)
 			return nil
