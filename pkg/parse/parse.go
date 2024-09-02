@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"night/cmd/flags"
 	"regexp"
 	"strings"
 )
@@ -19,6 +20,7 @@ type Table struct {
 }
 
 type Parser struct {
+	Driver       flags.DataBaseDriver
 	fileContents []byte
 	SqlQuery     string
 	Tables       []Table
@@ -34,7 +36,47 @@ func (p *Parser) SetFileContents(contents []byte) {
 	p.fileContents = contents
 }
 
-func (p *Parser) Parse() {
+func (p Parser) mapToSql(goType string) string {
+	// NOTE: add sqlite and postgres types
+	// sqlite types
+	// if p.Driver == flags.SQLITE {
+	switch goType {
+	case "int":
+		return "INTEGER"
+	case "string":
+		return "TEXT"
+	case "bool":
+		return "BOOL"
+	default:
+		return "TEXT"
+	}
+	// }
+}
+
+func (p Parser) parseTag(tag string) []string {
+	var attributes []string
+	tagParts := strings.Split(tag, ",")
+	for _, part := range tagParts {
+		part = strings.TrimSpace(part)
+		switch part {
+		case "primary_key":
+			attributes = append(attributes, "PRIMARY KEY")
+		case "unique":
+			attributes = append(attributes, "UNIQUE")
+		case "nullable":
+			attributes = append(attributes, "NULL")
+			// default:
+			// Handle other tags if necessary
+		}
+	}
+	return attributes
+}
+
+func (p Parser) GenerateSql() string {
+	return ""
+}
+
+func (p *Parser) Parse() (query string) {
 
 	structReg := regexp.MustCompile(`type\s+(\w+)\s+struct\s*{([^}]*)}`)
 	fieldReg := regexp.MustCompile(`(\w+)\s+(\w+(\.\w+)*)\s*(?:` + "`" + `([^` + "`" + `]*)` + "`" + `)?`)
@@ -75,4 +117,5 @@ func (p *Parser) Parse() {
 			p.Tables = append(p.Tables, Table{Name: structName, Fields: fieldList})
 		}
 	}
+	return ""
 }
