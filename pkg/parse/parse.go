@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"night/cmd/flags"
 	"regexp"
 	"strings"
@@ -26,14 +27,11 @@ type Parser struct {
 	Tables       []Table
 }
 
-func NewParser() *Parser {
+func NewParser(contents []byte) *Parser {
 	return &Parser{
-		Tables: make([]Table, 0),
+		Tables:       make([]Table, 0),
+		fileContents: contents,
 	}
-}
-
-func (p *Parser) SetFileContents(contents []byte) {
-	p.fileContents = contents
 }
 
 func (p Parser) mapToSql(goType string) string {
@@ -65,6 +63,8 @@ func (p Parser) parseTag(tag string) []string {
 			attributes = append(attributes, "UNIQUE")
 		case "nullable":
 			attributes = append(attributes, "NULL")
+		case "notnull":
+			attributes = append(attributes, "NOT NULL")
 			// default:
 			// Handle other tags if necessary
 		}
@@ -72,12 +72,44 @@ func (p Parser) parseTag(tag string) []string {
 	return attributes
 }
 
-func (p Parser) GenerateSql() string {
-	return ""
+func (p Parser) generateSql() string {
+	var query strings.Builder
+	for i := 0; i < len(p.Tables); i++ {
+		currTable := p.Tables[i]
+
+		query.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", currTable.Name))
+		for idx, fields := range currTable.Fields {
+			for k, v := range fields {
+				var tableName string
+				var parsedType string
+				var parsedTags string
+
+				if k == "name" {
+					tableName = v
+				}
+				if k == "type" {
+					parsedType = p.mapToSql(v)
+				}
+				if k == "orm" {
+					parsedTags = strings.Join(p.parseTag(v), " ")
+				}
+				query.WriteString(fmt.Sprintf("%s %s %s", tableName, parsedType, parsedTags))
+			}
+			if idx < len(currTable.Fields)-1 {
+				query.WriteString(",")
+			}
+		}
+		query.WriteString(")")
+
+		if i < len(p.Tables)-1 {
+			query.WriteString("\n")
+		}
+
+	}
+	return query.String()
 }
 
 func (p *Parser) Parse() (query string) {
-
 	structReg := regexp.MustCompile(`type\s+(\w+)\s+struct\s*{([^}]*)}`)
 	fieldReg := regexp.MustCompile(`(\w+)\s+(\w+(\.\w+)*)\s*(?:` + "`" + `([^` + "`" + `]*)` + "`" + `)?`)
 
@@ -99,6 +131,7 @@ func (p *Parser) Parse() (query string) {
 			fieldMatch := fieldReg.FindStringSubmatch(field)
 			if fieldMatch != nil {
 				fieldInfo := make(map[string]string, 0)
+				// fieldInfo = append(fieldInfo, fieldMatch[1], fieldMatch[2])
 				fieldInfo["name"] = fieldMatch[1]
 				fieldInfo["type"] = fieldMatch[2]
 
@@ -108,6 +141,7 @@ func (p *Parser) Parse() (query string) {
 					nightTag := strings.Split(tag, " ")
 					for _, part := range nightTag {
 						if strings.HasPrefix(part, "orm:") {
+							// fieldInfo = append(fieldInfo, strings.TrimPrefix(part, "orm:"))
 							fieldInfo["orm"] = strings.TrimPrefix(part, "orm:")
 						}
 					}
@@ -117,5 +151,5 @@ func (p *Parser) Parse() (query string) {
 			p.Tables = append(p.Tables, Table{Name: structName, Fields: fieldList})
 		}
 	}
-	return ""
+	return p.generateSql()
 }
