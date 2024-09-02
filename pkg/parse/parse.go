@@ -2,8 +2,11 @@ package parse
 
 import (
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"night/cmd/flags"
-	"regexp"
+	"reflect"
 	"strings"
 )
 
@@ -17,7 +20,7 @@ import (
 //	}
 type Table struct {
 	Name   string
-	Fields []map[string]string
+	Fields [][]string
 }
 
 type Parser struct {
@@ -37,15 +40,14 @@ func NewParser(contents []byte) *Parser {
 func (p Parser) mapToSql(goType string) string {
 	switch goType {
 	case "int":
-		return " INT"
+		return "INT"
 	case "string":
-		return " TEXT"
+		return "TEXT"
 	case "bool":
-		return " BOOL"
+		return "BOOL"
 	default:
-		return " TEXT"
+		return "TEXT"
 	}
-	// }
 }
 
 func (p Parser) parseTag(tag string) []string {
@@ -55,15 +57,13 @@ func (p Parser) parseTag(tag string) []string {
 		part = strings.TrimSpace(part)
 		switch part {
 		case "primary_key":
-			attributes = append(attributes, " PRIMARY KEY")
+			attributes = append(attributes, "PRIMARY KEY")
 		case "unique":
-			attributes = append(attributes, " UNIQUE")
+			attributes = append(attributes, "UNIQUE")
 		case "nullable":
-			attributes = append(attributes, " NULL")
+			attributes = append(attributes, "NULL")
 		case "notnull":
-			attributes = append(attributes, " NOT NULL")
-			// default:
-			// Handle other tags if necessary
+			attributes = append(attributes, "NOT NULL")
 		}
 	}
 	return attributes
@@ -76,69 +76,86 @@ func (p Parser) generateSql() string {
 
 		query.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", strings.ToLower(currTable.Name)))
 		for idx, fields := range currTable.Fields {
-			for k, v := range fields {
-				var ident string
-
-				if k == "name" {
-					ident = strings.ToLower(v)
-				}
-				if k == "type" {
-					ident = p.mapToSql(v)
-				}
-				if k == "tag" {
-					ident = strings.Join(p.parseTag(v), " ")
-				}
-				query.WriteString(fmt.Sprintf("%s", ident))
-			}
+			query.WriteString(fmt.Sprintf("%s", strings.Join(fields, " ")))
 			if idx < len(currTable.Fields)-1 {
 				query.WriteString(",")
 			}
 		}
 		query.WriteString(")")
+		query.WriteString(";")
 
 		if i < len(p.Tables)-1 {
-			query.WriteString("\n")
+			query.WriteString(" ")
 		}
 
 	}
-	query.WriteString(";")
 	return query.String()
 }
 
-func (p *Parser) Parse() (query string) {
-	structReg := regexp.MustCompile(`type\s+(\w+)\s+struct\s*{([^}]*)}`)
-	fieldReg := regexp.MustCompile(`^\s*(\w+)\s+(\w+(?:\.\w+)*)\s*(?:` + "`" + `orm:"([^"]*)"` + "`" + `)?\s*$`)
+func (p *Parser) Parse() (query string, error error) {
+	fset := token.NewFileSet()
 
-	structMatches := structReg.FindAllStringSubmatch(string(p.fileContents), -1)
-	for _, match := range structMatches {
-		structName := match[1]
-		fields := match[2]
-
-		var fieldList []map[string]string
-		for _, field := range strings.Split(fields, "\n") {
-			field = strings.TrimSpace(field)
-
-			if field == "" {
-				continue
-			}
-
-			fieldMatch := fieldReg.FindStringSubmatch(field)
-			if fieldMatch != nil {
-				fieldInfo := make(map[string]string, 0)
-				// fieldInfo = append(fieldInfo, fieldMatch[1], fieldMatch[2])
-				fieldInfo["name"] = fieldMatch[1]
-				fieldInfo["type"] = fieldMatch[2]
-				// fieldInfo["tag"] = fieldMatch[4]
-
-				// TODO: Look over this and figure out types
-				tag := fieldMatch[3]
-				if tag != "" {
-					fieldInfo["tag"] = tag
-				}
-				fieldList = append(fieldList, fieldInfo)
-			}
-		}
-		p.Tables = append(p.Tables, Table{Name: structName, Fields: fieldList})
+	//parse
+	node, err := parser.ParseFile(fset, "", string(p.fileContents), parser.ParseComments)
+	if err != nil {
+		return "", fmt.Errorf("failed reading file %s", err.Error())
 	}
-	return p.generateSql()
+
+	// walk
+	ast.Inspect(node, func(n ast.Node) bool {
+		ts, ok := n.(*ast.TypeSpec)
+		if !ok {
+			return true
+		}
+		// We're only interested in structs
+		structType, ok := ts.Type.(*ast.StructType)
+		if !ok {
+			return true
+		}
+
+		table := Table{
+			Name: ts.Name.Name,
+		}
+
+		for _, field := range structType.Fields.List {
+			var fieldInfo []string
+			for _, name := range field.Names {
+				fieldInfo = append(fieldInfo, strings.ToLower(name.Name))
+			}
+			fieldInfo = append(fieldInfo, p.mapToSql(fieldType(field.Type)))
+			// fmt.Printf("Field: %s, Type: %s", name.Name, fieldType(field.Type))
+
+			if field.Tag != nil {
+				tag := reflectStructTag(field.Tag.Value)
+				ormTag := tag.Get("orm")
+				if ormTag != "" {
+					// fmt.Printf(", ORM Tag: %s", ormTag)
+					fieldInfo = append(fieldInfo, strings.Join(p.parseTag(ormTag), " "))
+				}
+			}
+			table.Fields = append(table.Fields, fieldInfo)
+		}
+		p.Tables = append(p.Tables, table)
+		return true
+	})
+	return p.generateSql(), nil
+}
+
+// extract the type as a string
+func fieldType(expr ast.Expr) string {
+	switch t := expr.(type) {
+	case *ast.Ident:
+		return t.Name
+	case *ast.SelectorExpr:
+		return fieldType(t.X) + "." + t.Sel.Name
+	default:
+		return ""
+	}
+}
+
+// clean up and parse struct tags
+func reflectStructTag(tag string) reflect.StructTag {
+	// Remove the backticks from the struct tag
+	tag = strings.Trim(tag, "`")
+	return reflect.StructTag(tag)
 }
