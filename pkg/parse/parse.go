@@ -35,18 +35,15 @@ func NewParser(contents []byte) *Parser {
 }
 
 func (p Parser) mapToSql(goType string) string {
-	// NOTE: add sqlite and postgres types
-	// sqlite types
-	// if p.Driver == flags.SQLITE {
 	switch goType {
 	case "int":
-		return "INTEGER"
+		return " INT"
 	case "string":
-		return "TEXT"
+		return " TEXT"
 	case "bool":
-		return "BOOL"
+		return " BOOL"
 	default:
-		return "TEXT"
+		return " TEXT"
 	}
 	// }
 }
@@ -58,13 +55,13 @@ func (p Parser) parseTag(tag string) []string {
 		part = strings.TrimSpace(part)
 		switch part {
 		case "primary_key":
-			attributes = append(attributes, "PRIMARY KEY")
+			attributes = append(attributes, " PRIMARY KEY")
 		case "unique":
-			attributes = append(attributes, "UNIQUE")
+			attributes = append(attributes, " UNIQUE")
 		case "nullable":
-			attributes = append(attributes, "NULL")
+			attributes = append(attributes, " NULL")
 		case "notnull":
-			attributes = append(attributes, "NOT NULL")
+			attributes = append(attributes, " NOT NULL")
 			// default:
 			// Handle other tags if necessary
 		}
@@ -80,20 +77,18 @@ func (p Parser) generateSql() string {
 		query.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", currTable.Name))
 		for idx, fields := range currTable.Fields {
 			for k, v := range fields {
-				var tableName string
-				var parsedType string
-				var parsedTags string
+				var ident string
 
 				if k == "name" {
-					tableName = v
+					ident = v
 				}
 				if k == "type" {
-					parsedType = p.mapToSql(v)
+					ident = p.mapToSql(v)
 				}
-				if k == "orm" {
-					parsedTags = strings.Join(p.parseTag(v), " ")
+				if k == "tag" {
+					ident = strings.Join(p.parseTag(v), " ")
 				}
-				query.WriteString(fmt.Sprintf("%s %s %s", tableName, parsedType, parsedTags))
+				query.WriteString(fmt.Sprintf("%s", ident))
 			}
 			if idx < len(currTable.Fields)-1 {
 				query.WriteString(",")
@@ -115,12 +110,10 @@ func (p *Parser) Parse() (query string) {
 
 	structMatches := structReg.FindAllStringSubmatch(string(p.fileContents), -1)
 	for _, match := range structMatches {
-
 		structName := match[1]
 		fields := match[2]
 
 		var fieldList []map[string]string
-
 		for _, field := range strings.Split(fields, "\n") {
 			field = strings.TrimSpace(field)
 
@@ -134,6 +127,7 @@ func (p *Parser) Parse() (query string) {
 				// fieldInfo = append(fieldInfo, fieldMatch[1], fieldMatch[2])
 				fieldInfo["name"] = fieldMatch[1]
 				fieldInfo["type"] = fieldMatch[2]
+				// fieldInfo["tag"] = fieldMatch[4]
 
 				// TODO: Look over this and figure out types
 				tag := fieldMatch[4]
@@ -141,8 +135,7 @@ func (p *Parser) Parse() (query string) {
 					nightTag := strings.Split(tag, " ")
 					for _, part := range nightTag {
 						if strings.HasPrefix(part, "orm:") {
-							// fieldInfo = append(fieldInfo, strings.TrimPrefix(part, "orm:"))
-							fieldInfo["orm"] = strings.TrimPrefix(part, "orm:")
+							fieldInfo["tag"] = strings.TrimPrefix(part, "orm:")
 						}
 					}
 				}
