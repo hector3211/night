@@ -74,13 +74,13 @@ func (p Parser) generateSql() string {
 	for i := 0; i < len(p.Tables); i++ {
 		currTable := p.Tables[i]
 
-		query.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", currTable.Name))
+		query.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", strings.ToLower(currTable.Name)))
 		for idx, fields := range currTable.Fields {
 			for k, v := range fields {
 				var ident string
 
 				if k == "name" {
-					ident = v
+					ident = strings.ToLower(v)
 				}
 				if k == "type" {
 					ident = p.mapToSql(v)
@@ -101,12 +101,13 @@ func (p Parser) generateSql() string {
 		}
 
 	}
+	query.WriteString(";")
 	return query.String()
 }
 
 func (p *Parser) Parse() (query string) {
 	structReg := regexp.MustCompile(`type\s+(\w+)\s+struct\s*{([^}]*)}`)
-	fieldReg := regexp.MustCompile(`(\w+)\s+(\w+(\.\w+)*)\s*(?:` + "`" + `([^` + "`" + `]*)` + "`" + `)?`)
+	fieldReg := regexp.MustCompile(`^\s*(\w+)\s+(\w+(?:\.\w+)*)\s*(?:` + "`" + `orm:"([^"]*)"` + "`" + `)?\s*$`)
 
 	structMatches := structReg.FindAllStringSubmatch(string(p.fileContents), -1)
 	for _, match := range structMatches {
@@ -130,19 +131,14 @@ func (p *Parser) Parse() (query string) {
 				// fieldInfo["tag"] = fieldMatch[4]
 
 				// TODO: Look over this and figure out types
-				tag := fieldMatch[4]
+				tag := fieldMatch[3]
 				if tag != "" {
-					nightTag := strings.Split(tag, " ")
-					for _, part := range nightTag {
-						if strings.HasPrefix(part, "orm:") {
-							fieldInfo["tag"] = strings.TrimPrefix(part, "orm:")
-						}
-					}
+					fieldInfo["tag"] = tag
 				}
 				fieldList = append(fieldList, fieldInfo)
 			}
-			p.Tables = append(p.Tables, Table{Name: structName, Fields: fieldList})
 		}
+		p.Tables = append(p.Tables, Table{Name: structName, Fields: fieldList})
 	}
 	return p.generateSql()
 }
