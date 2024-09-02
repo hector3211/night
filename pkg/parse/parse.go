@@ -13,10 +13,10 @@ import (
 // table example writin in Go
 //
 //	type Users struct {
-//	    ID night.Int `orm:"primary_key"`
-//	    Name night.String
-//	    Email night.VarChar `orm:"unique"`
-//	    EmailVerified night.Bool `orm:"nullable"`
+//	    ID int `orm:"primary_key"`
+//	    Name string
+//	    Email string `orm:"unique"`
+//	    EmailVerified bool `orm:"nullable"`
 //	}
 type Table struct {
 	Name   string
@@ -26,7 +26,6 @@ type Table struct {
 type Parser struct {
 	Driver       flags.DataBaseDriver
 	fileContents []byte
-	SqlQuery     string
 	Tables       []Table
 }
 
@@ -38,16 +37,33 @@ func NewParser(contents []byte) *Parser {
 }
 
 func (p Parser) mapToSql(goType string) string {
-	switch goType {
-	case "int":
-		return "INT"
-	case "string":
-		return "TEXT"
-	case "bool":
-		return "BOOL"
-	default:
-		return "TEXT"
+	if p.Driver == flags.SQLITE {
+		switch goType {
+		case "int":
+			return "INT"
+		case "string":
+			return "TEXT"
+		case "bool":
+			return "BOOL"
+		default:
+			return "TEXT"
+		}
 	}
+	if p.Driver == flags.POSTGRES {
+		// Postgres driver
+		switch goType {
+		case "int":
+			return "INT"
+		case "string":
+			return "TEXT"
+		case "bool":
+			return "BOOL"
+		default:
+			return "TEXT"
+		}
+	}
+
+	return ""
 }
 
 func (p Parser) parseTag(tag string) []string {
