@@ -29,10 +29,11 @@ type Parser struct {
 	Tables       []Table
 }
 
-func NewParser(contents []byte) *Parser {
+func NewParser(driver flags.DataBaseDriver, contents []byte) *Parser {
 	return &Parser{
 		Tables:       make([]Table, 0),
 		fileContents: contents,
+		Driver:       driver,
 	}
 }
 
@@ -40,7 +41,7 @@ func (p Parser) mapToSql(goType string) string {
 	if p.Driver == flags.SQLITE {
 		switch goType {
 		case "int":
-			return "INT"
+			return "INTEGER"
 		case "string":
 			return "TEXT"
 		case "bool":

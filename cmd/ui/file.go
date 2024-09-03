@@ -2,11 +2,9 @@ package ui
 
 import (
 	"fmt"
-	"night/cmd/flags"
 	"night/cmd/program"
 	"night/cmd/utils"
 	"os"
-	"strings"
 
 	"github.com/charmbracelet/bubbles/filepicker"
 	"github.com/charmbracelet/lipgloss"
@@ -35,17 +33,11 @@ type FileModel struct {
 	exit       *bool
 }
 
-func InitializeFileModel(fileType *flags.SeedLanguage, selection *SelectedFilePath, program *program.Project) FileModel {
-	var fileTypeStr string
-	if fileType == nil {
-		fileTypeStr = "sql"
-	} else {
-		fileTypeStr = strings.ToLower(fileType.String())
-	}
+func InitializeFileModel(selection *SelectedFilePath, program *program.Project) FileModel {
 	fp := filepicker.New()
-	fp.AllowedTypes = []string{fmt.Sprintf(".%s", fileTypeStr)}
+	fp.AllowedTypes = []string{".sql", ".go"}
 	fp.CurrentDirectory, _ = os.Getwd()
-	header := fmt.Sprintf("Search for your seed.%s file", fileTypeStr)
+	header := "Search for your seed file"
 	return FileModel{
 		header:     sqlFileTitleStyle.Render(header),
 		filePicker: fp,

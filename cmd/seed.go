@@ -33,11 +33,11 @@ const logo = `
 func init() {
 	var flagDBDriver flags.DataBaseDriver
 	var flagSqlFilePath flags.File
-	var flagSeedLanguage flags.SeedLanguage
+	// var flagSeedLanguage flags.SeedLanguage
 	rootCmd.AddCommand(seedCmd)
 
 	seedCmd.Flags().VarP(&flagDBDriver, "driver", "d", fmt.Sprintf("Database drivers to use. Allowed values: %s", strings.Join(flags.AllowedDbDrivers, ",")))
-	seedCmd.Flags().VarP(&flagSeedLanguage, "type", "t", fmt.Sprintf("Language type used for seeding. Allowed values %s", strings.Join(flags.AllowedFileTypes, ",")))
+	// seedCmd.Flags().VarP(&flagSeedLanguage, "type", "t", fmt.Sprintf("Language type used for seeding. Allowed values %s", strings.Join(flags.AllowedFileTypes, ",")))
 	seedCmd.Flags().VarP(&flagSqlFilePath, "path", "p", fmt.Sprintf("Path to SQL seed file example - ./seed.sql"))
 }
 
@@ -55,7 +55,7 @@ var seedCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		flagDBDriver := flags.DataBaseDriver(cmd.Flag("driver").Value.String())
 		flagSqlFilePath := flags.File(cmd.Flag("path").Value.String())
-		flagSeedLanguage := flags.SeedLanguage(cmd.Flag("type").Value.String())
+		// flagSeedLanguage := flags.SeedLanguage(cmd.Flag("type").Value.String())
 
 		log.Printf("called seed with flag: %s %s", flagDBDriver.String(), flagSqlFilePath.String())
 
@@ -66,9 +66,9 @@ var seedCmd = &cobra.Command{
 		}
 
 		project := &program.Project{
-			DBDriver:      flagDBDriver,
-			FilePath:      flagSqlFilePath,
-			SeedLanguage:  flagSeedLanguage,
+			DBDriver: flagDBDriver,
+			FilePath: flagSqlFilePath,
+			// SeedLanguage:  flagSeedLanguage,
 			ConnectionUrl: "",
 		}
 
@@ -88,44 +88,45 @@ var seedCmd = &cobra.Command{
 
 		}
 
-		if project.SeedLanguage == flags.UNKNWON {
-			tprogram := tea.NewProgram(ui.InitializeChoiceModel(options.SeedLanguage, project))
-			if _, err := tprogram.Run(); err != nil {
-				cobra.CheckErr(fmt.Sprintf("failed runing seed language model: %s", err))
-			}
-			project.ExitCli(tprogram)
-
-			if options.SeedLanguage.Choice != "" {
-				switch options.SeedLanguage.GetValue() {
-				case "Go":
-					project.SeedLanguage = flags.SeedLanguage(strings.ToLower(options.SeedLanguage.Choice))
-				case "SQL":
-					project.SeedLanguage = flags.SeedLanguage(strings.ToLower(options.SeedLanguage.Choice))
-				}
-			}
-			err := cmd.Flag("type").Value.Set(string(project.SeedLanguage))
-			if err != nil {
-				log.Fatalf("failed to set the seed language type flag value: %s", err)
-			}
-		}
+		// if project.SeedLanguage == flags.UNKNWON {
+		// 	tprogram := tea.NewProgram(ui.InitializeChoiceModel(options.SeedLanguage, project))
+		// 	if _, err := tprogram.Run(); err != nil {
+		// 		cobra.CheckErr(fmt.Sprintf("failed runing seed language model: %s", err))
+		// 	}
+		// 	project.ExitCli(tprogram)
+		//
+		// 	if options.SeedLanguage.Choice != "" {
+		// 		switch options.SeedLanguage.GetValue() {
+		// 		case "Go":
+		// 			project.SeedLanguage = flags.SeedLanguage(strings.ToLower(options.SeedLanguage.Choice))
+		// 		case "SQL":
+		// 			project.SeedLanguage = flags.SeedLanguage(strings.ToLower(options.SeedLanguage.Choice))
+		// 		}
+		// 	}
+		// 	err := cmd.Flag("type").Value.Set(string(project.SeedLanguage))
+		// 	if err != nil {
+		// 		log.Fatalf("failed to set the seed language type flag value: %s", err)
+		// 	}
+		// }
 
 		if project.FilePath == "" {
 			// start sql file picker UI
-			tprogram := tea.NewProgram(ui.InitializeFileModel(&project.SeedLanguage, options.FilePath, project))
+			tprogram := tea.NewProgram(ui.InitializeFileModel(options.FilePath, project))
 			if _, err := tprogram.Run(); err != nil {
 				cobra.CheckErr(fmt.Sprintf("failed runing db file model: %s", err))
 			}
 			project.ExitCli(tprogram)
 
 			project.FilePath = flags.File(strings.ToLower(options.FilePath.Choice))
-			err := cmd.Flag("path").Value.Set(string(project.FilePath))
+
+			err := cmd.Flag("path").Value.Set(project.FilePath.String())
 			if err != nil {
 				log.Fatalf("failed to set the path flag value: %s", err)
 			}
 		}
 
 		connectionUrl := "mydb.db" // sqlite db file
-		if project.DBDriver.String() != "sqlite3" || project.SeedLanguage != flags.GOLANG {
+		if project.DBDriver.String() != "sqlite3" {
 			if project.ConnectionUrl == "" {
 				tprogram := tea.NewProgram(ui.InitializeConnModel(options.ConnectionUrl, project))
 				if _, err := tprogram.Run(); err != nil {
@@ -145,28 +146,29 @@ var seedCmd = &cobra.Command{
 		)
 		defer db.DB.Close()
 		if err != nil {
-			cobra.CheckErr(fmt.Sprintf("failed establishing a DB connection with: %s", err))
-			// log.Fatalf("failed establishing a DB connection: %s", err)
-			// panic("failed establishing a DB connection")
+			cobra.CheckErr(fmt.Sprintf("failed establishing a database connection with: %s", err))
 		}
 
-		// TODO: Halt this and check if the user picked a go file instead
-		// of a sql file
-		// * Need to parse the golang file and create query for it
-		// read from file
 		fileData, err := os.ReadFile(db.FilePath)
 		if err != nil {
-			cobra.CheckErr(fmt.Sprintf("failed reading sql file with: %s", err))
+			cobra.CheckErr(fmt.Sprintf("failed reading file with: %s", err))
 		}
 
 		var query string
+		fileType := strings.Split(project.FilePath.String(), ".")[1]
 
 		// parse go file
-		if project.SeedLanguage == flags.GOLANG {
-			parser := parse.NewParser()
-			parser.SetFileContents(fileData)
+		if fileType == "go" {
+			parser := parse.NewParser(project.DBDriver, fileData)
+			generatedSql, err := parser.Parse()
+			if err != nil {
+				cobra.CheckErr(fmt.Sprintf("failed generating SQL from go file: %s", err))
+			}
 
-		} else if project.SeedLanguage == flags.SQL {
+			query = generatedSql
+
+		}
+		if fileType == "sql" {
 			query = string(fileData)
 		}
 

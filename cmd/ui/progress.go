@@ -2,7 +2,6 @@ package ui
 
 import (
 	"night/cmd/program"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -23,7 +22,7 @@ var (
 type tickMsg time.Time
 
 type ProgressModel struct {
-	header   string
+	// header   string
 	percent  float64
 	progress progress.Model
 	exit     *bool
@@ -31,9 +30,8 @@ type ProgressModel struct {
 
 func InitializeProgressModel(program *program.Project) ProgressModel {
 	pg := progress.New(progress.WithScaledGradient("#15F5BA", "#836FFF"))
-	header := "Working..."
 	return ProgressModel{
-		header:   header,
+		// header:   header,
 		percent:  0.0,
 		progress: pg,
 		exit:     &program.Exit,
@@ -59,7 +57,7 @@ func (m ProgressModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tickMsg:
-		m.percent += 0.25
+		m.percent += 0.50
 		if m.percent > 1.0 {
 			m.percent = 1.0
 			return m, tea.Batch(tea.ClearScreen, tea.Quit)
@@ -73,13 +71,13 @@ func (m ProgressModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m ProgressModel) View() string {
-	s := prgressTitleStyle.Render(m.header)
-	pad := strings.Repeat(" ", padding)
-	s += pad + m.progress.ViewAs(m.percent) + "\n\n"
+	// s := prgressTitleStyle.Render(m.header)
+	s := ""
+	// pad := strings.Repeat(" ", padding)
+	s += m.progress.ViewAs(m.percent) + "\n\n"
 	s += helpStyle.Render("Press [esc] [ctrl-c] [q] to quit")
 
-	return "\n" +
-		pad + m.progress.ViewAs(m.percent) + "\n\n"
+	return s
 }
 
 func tickCmd() tea.Cmd {

@@ -7,3 +7,4 @@ night
 test.db
 mydb.db
 seed.sql
+pkg/db*

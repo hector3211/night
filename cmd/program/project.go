@@ -11,7 +11,7 @@ import (
 type Project struct {
 	DBDriver flags.DataBaseDriver
 	FilePath flags.File
-	flags.SeedLanguage
+	// flags.SeedLanguage
 	ConnectionUrl string
 	Exit          bool
 }

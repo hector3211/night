@@ -1,8 +1,13 @@
 package flags
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type File string
+
+var AllowedTypes = []string{"go", "sql"}
 
 func (d File) String() string {
 	return string(d)
@@ -12,9 +17,11 @@ func (f *File) Type() string {
 	return "path"
 }
 
+// TODO: fix file path problems
 func (f *File) Set(value string) error {
-	for _, driver := range AllowedFileTypes {
-		if driver == value {
+	fileType := strings.Split(value, ".")[1]
+	for _, file := range AllowedTypes {
+		if file == fileType {
 			*f = File(value)
 			return nil
 		}
