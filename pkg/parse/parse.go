@@ -13,10 +13,10 @@ import (
 // table example writin in Go
 //
 //	type Users struct {
-//	    ID int `orm:"primary_key"`
+//	    ID int `night:"primary_key"`
 //	    Name string
-//	    Email string `orm:"unique"`
-//	    EmailVerified bool `orm:"nullable"`
+//	    Email string `night:"unique"`
+//	    EmailVerified bool `night:"nullable"`
 //	}
 type Table struct {
 	Name   string

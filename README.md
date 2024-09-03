@@ -44,10 +44,10 @@ INSERT INTO users (username) VALUES ( 'maddog' );
 
 // User Table
 type Users struct {
-    ID night.Int `orm:"primary_key"`
-    Name night.String
-    Email night.VarChar `orm:"unique"`
-    EmailVerified night.Bool `orm:"nullable"`
+    ID int `night:"primary_key"`
+    Name string `night:"notnull"`
+    Email string `night:"unique"`
+    EmailVerified bool `night:"nullable"`
 }
 
 ```

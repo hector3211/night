@@ -1,12 +1,12 @@
 package parse
 
 type Users struct {
-	ID   int    `orm:"primary_key"`
-	Name string `orm:"nullable"`
+	ID   int    `night:"primary_key"`
+	Name string `night:"nullable"`
 }
 
 type Orders struct {
-	OrderID int `orm:"primary_key"`
-	UserID  int `orm:"unique"`
+	OrderID int `night:"primary_key"`
+	UserID  int `night:"unique"`
 	Amount  string
 }
