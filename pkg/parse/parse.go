@@ -2,10 +2,10 @@ package parse
 
 import (
 	"fmt"
+	"github.com/hector3211/night/cmd/flags"
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"night/cmd/flags"
 	"reflect"
 	"strings"
 )

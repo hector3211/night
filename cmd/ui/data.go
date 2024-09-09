@@ -4,8 +4,8 @@ import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"night/cmd/program"
-	"night/cmd/utils"
+	"github.com/hector3211/night/cmd/program"
+	"github.com/hector3211/night/cmd/utils"
 )
 
 var (

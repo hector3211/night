@@ -2,8 +2,8 @@ package ui
 
 import (
 	"fmt"
-	"night/cmd/program"
-	"night/cmd/utils"
+	"github.com/hector3211/night/cmd/program"
+	"github.com/hector3211/night/cmd/utils"
 	"os"
 
 	"github.com/charmbracelet/bubbles/filepicker"

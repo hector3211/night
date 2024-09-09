@@ -4,7 +4,7 @@ Copyright © 2024 Hector Orpesa
 package main
 
 import (
-	"night/cmd"
+	"github.com/hector3211/night/cmd"
 )
 
 func main() {

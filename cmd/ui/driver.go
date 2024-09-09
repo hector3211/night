@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fmt"
-	"night/cmd/program"
+	"github.com/hector3211/night/cmd/program"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

@@ -3,8 +3,8 @@ package ui
 import (
 	"errors"
 	"fmt"
-	"night/cmd/program"
-	"night/cmd/utils"
+	"github.com/hector3211/night/cmd/program"
+	"github.com/hector3211/night/cmd/utils"
 	"regexp"
 
 	"github.com/charmbracelet/bubbles/textinput"

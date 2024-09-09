@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"night/cmd/program"
+	"github.com/hector3211/night/cmd/program"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"

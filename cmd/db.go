@@ -4,7 +4,7 @@ package cmd
 
 import (
 	"database/sql"
-	"night/cmd/flags"
+	"github.com/hector3211/night/cmd/flags"
 
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"

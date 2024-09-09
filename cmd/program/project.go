@@ -1,8 +1,8 @@
 package program
 
 import (
+	"github.com/hector3211/night/cmd/flags"
 	"log"
-	"night/cmd/flags"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"

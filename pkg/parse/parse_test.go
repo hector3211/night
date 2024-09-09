@@ -1,7 +1,7 @@
 package parse
 
 import (
-	"night/cmd/flags"
+	"github.com/hector3211/night/cmd/flags"
 	"os"
 	"testing"
 )

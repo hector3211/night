@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/hector3211/night/cmd/flags"
+	"github.com/hector3211/night/cmd/program"
+	"github.com/hector3211/night/cmd/ui"
+	"github.com/hector3211/night/pkg/parse"
 	"log"
-	"night/cmd/flags"
-	"night/cmd/program"
-	"night/cmd/ui"
-	"night/pkg/parse"
 	"os"
 	"strings"
 
