@@ -1,4 +1,4 @@
-module night
+module github.com/hector3211/night
 
 go 1.22.0
 
