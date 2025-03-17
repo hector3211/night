@@ -3,9 +3,10 @@ package ui
 import (
 	"errors"
 	"fmt"
+	"regexp"
+
 	"github.com/hector3211/night/cmd/program"
 	"github.com/hector3211/night/cmd/utils"
-	"regexp"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -100,7 +101,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.connectionUrl.Update(m.input.Value())
 				return m, tea.Quit
 			}
-		case "ctrl-c", "esc", "q":
+		case "ctrl-c", "esc":
 			*m.exit = true
 			return m, tea.Quit
 		}
