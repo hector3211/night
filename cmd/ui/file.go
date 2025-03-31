@@ -2,9 +2,10 @@ package ui
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/hector3211/night/cmd/program"
 	"github.com/hector3211/night/cmd/utils"
-	"os"
 
 	"github.com/charmbracelet/bubbles/filepicker"
 	"github.com/charmbracelet/lipgloss"

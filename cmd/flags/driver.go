@@ -14,8 +14,8 @@ const (
 
 var AllowedDbDrivers = []string{"sqlite3", "postgres"}
 
-func (d DataBaseDriver) String() string {
-	return string(d)
+func (f DataBaseDriver) String() string {
+	return string(f)
 }
 
 func (f *DataBaseDriver) Type() string {
