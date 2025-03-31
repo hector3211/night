@@ -1,18 +1,18 @@
 package program
 
 import (
-	"github.com/hector3211/night/cmd/flags"
 	"log"
 	"os"
+
+	"github.com/hector3211/night/cmd/flags"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Project struct {
-	DBDriver flags.DataBaseDriver
-	FilePath flags.File
-	// flags.SeedLanguage
-	ConnectionUrl string
+	DBDriver      flags.DataBaseDriver
+	FilePath      flags.File
+	ConnectionUrl flags.UrlConnection
 	Exit          bool
 }
 

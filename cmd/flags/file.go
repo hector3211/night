@@ -2,6 +2,8 @@ package flags
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -17,11 +19,19 @@ func (f *File) Type() string {
 	return "path"
 }
 
-// TODO: fix file path problems
 func (f *File) Set(value string) error {
-	fileType := strings.Split(value, ".")[1]
-	for _, file := range AllowedTypes {
-		if file == fileType {
+	if _, err := os.Stat(value); os.IsNotExist(err) {
+		return fmt.Errorf("file does not exists: %s", err)
+	}
+
+	ext := filepath.Ext(value)
+	if ext == "" {
+		return fmt.Errorf("file has no extension, but be on of: %s", strings.Join(AllowedTypes, ","))
+	}
+
+	fileType := strings.ToLower(ext[1:])
+	for _, allowed := range AllowedTypes {
+		if allowed == fileType {
 			*f = File(value)
 			return nil
 		}
