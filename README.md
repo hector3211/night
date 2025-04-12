@@ -58,10 +58,20 @@ Then run this command to start seeding
 night seed
 ```
 
+Seed using flags
+
+```bash
+night seed -d poostgres -p ./seed.sql  -u postgres://postgres:postgres@localhost:5432/mydb
+```
+
+Seed using flags and Golang
+
+```bash
+night seed -d poostgres -p ./seed.go  -u postgres://postgres:postgres@localhost:5432/mydb
+```
+
 ### Database Drivers Supported
 
 ✅ sqlite3
 ✅ postgres
 🟧 mysql
-
-more incoming...
